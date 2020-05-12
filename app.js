@@ -3,22 +3,11 @@ const express = require('express');
 
 const app = express();
 
-// //root URL with the HTTP method and a callback function by using json it will automatically set the content type to json. 
-// app.get('/', (req, res) => {
-//   res.status(200).json({ message: 'Hello from the server side', app: 'ustours' });
-// });
+app.use(express.json());
 
-// app.post('/', (req, res) => {
-//   res.send('You can post to this endpoint...');
-// });
-
-//Parsing the data into an array of Javascript objects in the tours-simple folder. 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
-//route handler sending back to the client once the tours has been parsed. 
-// data property the data will then in turn have a object and the response we want to send which is tours. In ES6 we do not need to specify the key and the value if the name is the same. 
-//Test this out in Postman 127.0.0.1:3000/api/v1/tours
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -26,7 +15,75 @@ app.get('/api/v1/tours', (req, res) => {
       tours
     }
   });
-})
+};
+
+const getTour = (req, res) => {
+  console.log(req.params);
+
+  const id = req.params.id * 1;
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid Id'
+    });
+  };
+
+  const tour = tours.find(el => el.id === id);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour
+    }
+  });
+};
+
+const createTour = (req, res) => {
+  const newId = tours[tours.length - 1].id + 1;
+  const newTour = Object.assign({ id: newId }, req.body);
+
+  tours.push(newTour);
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+    res.status(201).json({
+      status: 'success',
+      data: { tour: newTour }
+    });
+  });
+};
+
+const updateTour = (req, res) => {
+
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid Id'
+    });
+  };
+
+  res.status(200).json({
+    status: 'success',
+    data: { tour: '< Updated tour here...>' }
+  });
+}
+
+const deleteTour = (req, res) => {
+
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid Id'
+    });
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+};
+
+//Refactored code after the endpoint, we call the function 
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app.route('/api/v1/tours/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 //start up a server with a callback function
 const port = 3000;
