@@ -10,7 +10,7 @@ const app = express();
 //This middleware applies to each and every request if the route handler comes before the route handler.
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-} // logger the time it took to send back the response 
+} // logger the time it took to send back the response
 
 app.use(express.json());
 
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
-})
+});
 
 //Routes (Middleware)
 app.use('/api/v1/tours', tourRouter);
