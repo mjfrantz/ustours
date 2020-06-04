@@ -1,7 +1,3 @@
-//1 Class inheritance from the other which is error
-//we call super in order to call the parent constructor
-//we do that with message because message is the only parameter that the built in error accepts
-
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
